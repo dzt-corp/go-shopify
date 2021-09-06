@@ -20,7 +20,7 @@ type OrderService interface {
 	ListWithPagination(interface{}) ([]Order, *Pagination, error)
 	Count(interface{}) (int, error)
 	Get(int64, interface{}) (*Order, error)
-	GetRefund(int64) (interface{}, error)
+	GetRefund(int64) (*OrderRefundResource, error)
 	Create(Order) (*Order, error)
 	Update(Order) (*Order, error)
 	Cancel(int64, interface{}) (*Order, error)
@@ -272,7 +272,7 @@ type OrderResource struct {
 
 // Represents the result from the orders/X.json endpoint
 type OrderRefundResource struct {
-	Refunds []map[string]interface{} `json:"refunds"`
+	Refunds []Refund `json:"refunds"`
 }
 
 // Represents the result from the orders.json endpoint
@@ -427,7 +427,7 @@ func (s *OrderServiceOp) Get(orderID int64, options interface{}) (*Order, error)
 }
 
 // Get individual order
-func (s *OrderServiceOp) GetRefund(orderID int64) (interface{}, error) {
+func (s *OrderServiceOp) GetRefund(orderID int64) (*OrderRefundResource, error) {
 	path := fmt.Sprintf("%s/%v/refunds.json", ordersBasePath, orderID)
 	resource := new(OrderRefundResource)
 	err := s.client.Get(path, resource, nil)

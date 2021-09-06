@@ -1,6 +1,7 @@
 package goshopify
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -289,6 +290,42 @@ func TestOrderGet(t *testing.T) {
 	}
 
 	orderTests(t, *order)
+}
+func TestOrderGetRefund(t *testing.T) {
+	setup()
+	defer teardown()
+
+	httpmock.RegisterResponder("GET", fmt.Sprintf("https://fooshop.myshopify.com/%s/orders/450789469/refunds.json", client.pathPrefix),
+		httpmock.NewBytesResponder(200, loadFixture("order_refund.json")))
+
+	order, err := client.Order.GetRefund(450789469)
+	if err != nil {
+		t.Errorf("Order.GetRefund returned error: %v", err)
+	}
+	byte, _ := json.Marshal(order)
+	var orderMap map[string]interface{}
+	err = json.Unmarshal(byte, &orderMap)
+	if err != nil {
+		t.Errorf("TestOrderGetRefund error: %v", err)
+	}
+	refunds := orderMap["refunds"]
+	byte, _ = json.Marshal(refunds)
+	var refundMap []map[string]interface{}
+	err = json.Unmarshal(byte, &refundMap)
+	if err != nil {
+		t.Errorf("TestOrderGetRefund error: %v", err)
+	}
+	found := false
+	for _, v := range refundMap {
+		actual := v["order_id"].(float64)
+		if actual == 450789469 {
+			found = true
+		}
+	}
+
+	if !found {
+		t.Error("Error.")
+	}
 }
 
 func TestOrderGetWithTransactions(t *testing.T) {

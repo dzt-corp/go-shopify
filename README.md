@@ -20,13 +20,13 @@ This library has been tested against the following versions of Go
 ## Install
 
 ```console
-$ go get github.com/bold-commerce/go-shopify
+$ go get github.com/dzt-corp/go-shopify
 ```
 
 ## Use
 
 ```go
-import "github.com/bold-commerce/go-shopify"
+import "github.com/dzt-corp/go-shopify"
 ```
 
 This gives you access to the `goshopify` package.
@@ -110,7 +110,7 @@ numProducts, err := client.Product.Count(nil)
 ```
 ### Client Options
 When creating a client there are configuration options you can pass to NewClient. Simply use the last variadic param and 
-pass in the built in options or create your own and manipulate the client. See [options.go](https://github.com/bold-commerce/go-shopify/blob/master/options.go)
+pass in the built in options or create your own and manipulate the client. See [options.go](https://github.com/dzt-corp/go-shopify/blob/master/options.go)
 for more details.
 
 #### WithVersion

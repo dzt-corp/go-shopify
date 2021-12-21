@@ -20,6 +20,7 @@ type OrderService interface {
 	ListWithPagination(interface{}) ([]Order, *Pagination, error)
 	Count(interface{}) (int, error)
 	Get(int64, interface{}) (*Order, error)
+	GetOrderHighRisk(int64) (*OrderHightRisk, error)
 	GetRefund(int64) (*OrderRefundResource, error)
 	Create(Order) (*Order, error)
 	Update(Order) (*Order, error)
@@ -77,6 +78,21 @@ type OrderCancelOptions struct {
 	Reason   string           `json:"reason,omitempty"`
 	Email    bool             `json:"email,omitempty"`
 	Refund   *Refund          `json:"refund,omitempty"`
+}
+type OrderHightRisk struct {
+	Risks []OrderHightRiskItem `json:"risks"`
+}
+type OrderHightRiskItem struct {
+	ID              int64   `json:"id"`
+	OrderID         int64   `json:"order_id"`
+	CheckoutID      int64   `json:"checkout_id"`
+	Source          string  `json:"source"`
+	Score           string  `json:"score"`
+	Recommendation  string  `json:"recommendation"`
+	Display         bool    `json:"display"`
+	CauseCancel     *string `json:"cause_cancel"`
+	Message         string  `json:"message"`
+	MerchantMessage string  `json:"merchant_message"`
 }
 
 // Order represents a Shopify order
@@ -424,6 +440,14 @@ func (s *OrderServiceOp) Get(orderID int64, options interface{}) (*Order, error)
 	resource := new(OrderResource)
 	err := s.client.Get(path, resource, options)
 	return resource.Order, err
+}
+
+// Get refund high risk order
+func (s *OrderServiceOp) GetOrderHighRisk(orderID int64) (*OrderHightRisk, error) {
+	path := fmt.Sprintf("%s/%d/risks.json", ordersBasePath, orderID)
+	resource := new(OrderHightRisk)
+	err := s.client.Get(path, resource, nil)
+	return resource, err
 }
 
 // Get individual order

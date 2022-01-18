@@ -30,6 +30,7 @@ type Image struct {
 	Position   int        `json:"position,omitempty"`
 	CreatedAt  *time.Time `json:"created_at,omitempty"`
 	UpdatedAt  *time.Time `json:"updated_at,omitempty"`
+	Alt        string     `json:"alt,omitempty"`
 	Width      int        `json:"width,omitempty"`
 	Height     int        `json:"height,omitempty"`
 	Src        string     `json:"src,omitempty"`

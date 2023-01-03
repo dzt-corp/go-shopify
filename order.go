@@ -58,6 +58,28 @@ type OrderCountOptions struct {
 }
 
 // A struct for all available order list options.
+// See: https://help.shopify.com/api/reference/order-risk#get-orders-order-id-risks
+type OrderHightRisk struct {
+	Risks []OrderHightRiskItem `json:"risks"`
+}
+type OrderHightRiskItem struct {
+	ID              int64   `json:"id"`
+	OrderID         int64   `json:"order_id"`
+	CheckoutID      int64   `json:"checkout_id"`
+	Source          string  `json:"source"`
+	Score           string  `json:"score"`
+	Recommendation  string  `json:"recommendation"`
+	Display         bool    `json:"display"`
+	CauseCancel     *string `json:"cause_cancel"`
+	Message         string  `json:"message"`
+	MerchantMessage string  `json:"merchant_message"`
+}
+
+type OrderRefundResource struct {
+	Refunds []Refund `json:"refunds"`
+}
+
+// A struct for all available order list options.
 // See: https://help.shopify.com/api/reference/order#index
 type OrderListOptions struct {
 	ListOptions
@@ -78,21 +100,6 @@ type OrderCancelOptions struct {
 	Reason   string           `json:"reason,omitempty"`
 	Email    bool             `json:"email,omitempty"`
 	Refund   *Refund          `json:"refund,omitempty"`
-}
-type OrderHightRisk struct {
-	Risks []OrderHightRiskItem `json:"risks"`
-}
-type OrderHightRiskItem struct {
-	ID              int64   `json:"id"`
-	OrderID         int64   `json:"order_id"`
-	CheckoutID      int64   `json:"checkout_id"`
-	Source          string  `json:"source"`
-	Score           string  `json:"score"`
-	Recommendation  string  `json:"recommendation"`
-	Display         bool    `json:"display"`
-	CauseCancel     *string `json:"cause_cancel"`
-	Message         string  `json:"message"`
-	MerchantMessage string  `json:"merchant_message"`
 }
 
 // Order represents a Shopify order
@@ -284,11 +291,6 @@ type NoteAttribute struct {
 // Represents the result from the orders/X.json endpoint
 type OrderResource struct {
 	Order *Order `json:"order"`
-}
-
-// Represents the result from the orders/X.json endpoint
-type OrderRefundResource struct {
-	Refunds []Refund `json:"refunds"`
 }
 
 // Represents the result from the orders.json endpoint

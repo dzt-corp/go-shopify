@@ -557,7 +557,7 @@ func (s *OrderServiceOp) GetFulfillment(orderID int64, fulfillmentID int64, opti
 }
 
 // Create a new fulfillment for an order
-func (s *OrderServiceOp) CreateFulfillment(orderID int64, fulfillment Fulfillment) (*Fulfillment, error) {
+func (s *OrderServiceOp) CreateFulfillment(orderID int64, fulfillment RequestFulfillment) (*Fulfillment, error) {
 	fulfillmentService := &FulfillmentServiceOp{client: s.client, resource: ordersResourceName, resourceID: orderID}
 	return fulfillmentService.Create(fulfillment)
 }

@@ -12,7 +12,8 @@ type FulfillmentService interface {
 	List(interface{}) ([]Fulfillment, error)
 	Count(interface{}) (int, error)
 	Get(int64, interface{}) (*Fulfillment, error)
-	Create(Fulfillment) (*Fulfillment, error)
+	Create(RequestFulfillment) (*Fulfillment, error)
+	UpdateTracking(int64, RequestFulfillment) (*Fulfillment, error)
 	Update(Fulfillment) (*Fulfillment, error)
 	Complete(int64) (*Fulfillment, error)
 	Transition(int64) (*Fulfillment, error)
@@ -26,7 +27,7 @@ type FulfillmentsService interface {
 	ListFulfillments(int64, interface{}) ([]Fulfillment, error)
 	CountFulfillments(int64, interface{}) (int, error)
 	GetFulfillment(int64, int64, interface{}) (*Fulfillment, error)
-	CreateFulfillment(int64, Fulfillment) (*Fulfillment, error)
+	CreateFulfillment(int64, RequestFulfillment) (*Fulfillment, error)
 	UpdateFulfillment(int64, Fulfillment) (*Fulfillment, error)
 	CompleteFulfillment(int64, int64) (*Fulfillment, error)
 	TransitionFulfillment(int64, int64) (*Fulfillment, error)
@@ -59,6 +60,22 @@ type Fulfillment struct {
 	Receipt         Receipt    `json:"receipt,omitempty"`
 	LineItems       []LineItem `json:"line_items,omitempty"`
 	NotifyCustomer  bool       `json:"notify_customer"`
+}
+type RequestFulfillment struct {
+	FulfillmentID    int                `json:"fulfillment_id,omitempty"`
+	OriginAddress    *Address           `json:"origin_address,omitempty"`
+	FulfillmentOrder []FulfillmentOrder `json:"line_items_by_fulfillment_order,omitempty"`
+	TrackingInfo     TrackingInfo       `json:"tracking_info"`
+	NotifyCustomer   bool               `json:"notify_customer"`
+}
+type FulfillmentOrder struct {
+	FulfillmentOrderID int64      `json:"fulfillment_order_id,omitempty"`
+	LineItems          []LineItem `json:"fulfillment_order_line_items,omitempty"`
+}
+type TrackingInfo struct {
+	Company string `json:"company,omitempty"`
+	Number  string `json:"number,omitempty"`
+	Url     string `json:"url,omitempty"`
 }
 
 // Receipt represents a Shopify receipt.
@@ -103,12 +120,20 @@ func (s *FulfillmentServiceOp) Get(fulfillmentID int64, options interface{}) (*F
 }
 
 // Create a new fulfillment
-func (s *FulfillmentServiceOp) Create(fulfillment Fulfillment) (*Fulfillment, error) {
-	prefix := FulfillmentPathPrefix(s.resource, s.resourceID)
-	path := fmt.Sprintf("%s.json", prefix)
+func (s *FulfillmentServiceOp) Create(fulfillment RequestFulfillment) (*Fulfillment, error) {
+	//prefix := FulfillmentPathPrefix(s.resource, s.resourceID)
+	path := "fulfillments.json"
+	resource := new(FulfillmentResource)
+	err := s.client.Post(path, fulfillment, resource)
+	return resource.Fulfillment, err
+}
+
+// Update an existing fulfillment
+func (s *FulfillmentServiceOp) UpdateTracking(fulfillmentID int64, fulfillment Fulfillment) (*Fulfillment, error) {
+	path := fmt.Sprintf("fulfillments/%d/update_tracking.json", fulfillment.ID)
 	wrappedData := FulfillmentResource{Fulfillment: &fulfillment}
 	resource := new(FulfillmentResource)
-	err := s.client.Post(path, wrappedData, resource)
+	err := s.client.Put(path, wrappedData, resource)
 	return resource.Fulfillment, err
 }
 

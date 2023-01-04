@@ -129,11 +129,10 @@ func (s *FulfillmentServiceOp) Create(fulfillment RequestFulfillment) (*Fulfillm
 }
 
 // Update an existing fulfillment
-func (s *FulfillmentServiceOp) UpdateTracking(fulfillmentID int64, fulfillment Fulfillment) (*Fulfillment, error) {
-	path := fmt.Sprintf("fulfillments/%d/update_tracking.json", fulfillment.ID)
-	wrappedData := FulfillmentResource{Fulfillment: &fulfillment}
+func (s *FulfillmentServiceOp) UpdateTracking(fulfillmentID int64, fulfillment RequestFulfillment) (*Fulfillment, error) {
+	path := fmt.Sprintf("fulfillments/%d/update_tracking.json", fulfillmentID)
 	resource := new(FulfillmentResource)
-	err := s.client.Put(path, wrappedData, resource)
+	err := s.client.Put(path, fulfillment, resource)
 	return resource.Fulfillment, err
 }
 

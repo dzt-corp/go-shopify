@@ -62,7 +62,7 @@ type Fulfillment struct {
 	NotifyCustomer  bool       `json:"notify_customer"`
 }
 type RequestFulfillment struct {
-	FulfillmentID    int                `json:"fulfillment_id,omitempty"`
+	FulfillmentID    *int               `json:"fulfillment_id,omitempty"`
 	OriginAddress    *Address           `json:"origin_address,omitempty"`
 	FulfillmentOrder []FulfillmentOrder `json:"line_items_by_fulfillment_order,omitempty"`
 	TrackingInfo     TrackingInfo       `json:"tracking_info"`

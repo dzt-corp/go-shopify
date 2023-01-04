@@ -88,6 +88,9 @@ type Receipt struct {
 type FulfillmentResource struct {
 	Fulfillment *Fulfillment `json:"fulfillment"`
 }
+type RequestFulfillmentResource struct {
+	Fulfillment *RequestFulfillment `json:"fulfillment"`
+}
 
 // FulfillmentsResource represents the result from the fullfilments.json endpoint
 type FulfillmentsResource struct {
@@ -124,15 +127,17 @@ func (s *FulfillmentServiceOp) Create(fulfillment RequestFulfillment) (*Fulfillm
 	//prefix := FulfillmentPathPrefix(s.resource, s.resourceID)
 	path := "fulfillments.json"
 	resource := new(FulfillmentResource)
-	err := s.client.Post(path, fulfillment, resource)
+	wrappedData := RequestFulfillmentResource{Fulfillment: &fulfillment}
+	err := s.client.Post(path, wrappedData, resource)
 	return resource.Fulfillment, err
 }
 
 // Update an existing fulfillment
 func (s *FulfillmentServiceOp) UpdateTracking(fulfillmentID int64, fulfillment RequestFulfillment) (*Fulfillment, error) {
 	path := fmt.Sprintf("fulfillments/%d/update_tracking.json", fulfillmentID)
+	wrappedData := RequestFulfillmentResource{Fulfillment: &fulfillment}
 	resource := new(FulfillmentResource)
-	err := s.client.Put(path, fulfillment, resource)
+	err := s.client.Put(path, wrappedData, resource)
 	return resource.Fulfillment, err
 }
 

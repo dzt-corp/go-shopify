@@ -12,9 +12,10 @@ const collectionsBasePath = "collections"
 // of the Shopify API.
 // See: https://help.shopify.com/api/reference/products/collection
 type CollectionService interface {
+	List(interface{}) ([]Collection, error)
 	Get(collectionID int64, options interface{}) (*Collection, error)
 	ListProducts(collectionID int64, options interface{}) ([]Product, error)
-	ListProductsWithPagination(collectionID int64,options interface{}) ([]Product, *Pagination, error)
+	ListProductsWithPagination(collectionID int64, options interface{}) ([]Product, *Pagination, error)
 }
 
 // CollectionServiceOp handles communication with the collection related methods of
@@ -25,21 +26,26 @@ type CollectionServiceOp struct {
 
 // Collection represents a Shopify collection
 type Collection struct {
-	ID             int64       `json:"id"`
-	Handle         string      `json:"handle"`
-	Title          string      `json:"title"`
-	UpdatedAt      *time.Time  `json:"updated_at"`
-	BodyHTML       string      `json:"body_html"`
-	SortOrder      string      `json:"sort_order"`
-	TemplateSuffix string      `json:"template_suffix"`
-	Image          Image       `json:"image"`
-	PublishedAt    *time.Time  `json:"published_at"`
-	PublishedScope string      `json:"published_scope"`
+	ID             int64      `json:"id"`
+	Handle         string     `json:"handle"`
+	Title          string     `json:"title"`
+	UpdatedAt      *time.Time `json:"updated_at"`
+	BodyHTML       string     `json:"body_html"`
+	SortOrder      string     `json:"sort_order"`
+	TemplateSuffix string     `json:"template_suffix"`
+	Image          Image      `json:"image"`
+	Rules          []Rule     `json:"rules"`
+	Disjunctive    bool       `json:"disjunctive"`
+	PublishedAt    *time.Time `json:"published_at"`
+	PublishedScope string     `json:"published_scope"`
 }
 
 // Represents the result from the collections/X.json endpoint
 type CollectionResource struct {
 	Collection *Collection `json:"collection"`
+}
+type CollectionsResource struct {
+	Collections []*Collection `json:"collections"`
 }
 
 // Get individual collection
@@ -48,6 +54,12 @@ func (s *CollectionServiceOp) Get(collectionID int64, options interface{}) (*Col
 	resource := new(CollectionResource)
 	err := s.client.Get(path, resource, options)
 	return resource.Collection, err
+}
+func (s *CollectionServiceOp) List(options interface{}) ([]*Collection, error) {
+	path := fmt.Sprintf("%s.json", collectionsBasePath)
+	resource := new(CollectionsResource)
+	err := s.client.Get(path, resource, options)
+	return resource.Collections, err
 }
 
 // List products for a collection
@@ -60,7 +72,7 @@ func (s *CollectionServiceOp) ListProducts(collectionID int64, options interface
 }
 
 // List products for a collection and return pagination to retrieve next/previous results.
-func (s *CollectionServiceOp) ListProductsWithPagination(collectionID int64,options interface{}) ([]Product, *Pagination, error) {
+func (s *CollectionServiceOp) ListProductsWithPagination(collectionID int64, options interface{}) ([]Product, *Pagination, error) {
 	path := fmt.Sprintf("%s/%d/products.json", collectionsBasePath, collectionID)
 	resource := new(ProductsResource)
 	headers := http.Header{}

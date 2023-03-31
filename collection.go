@@ -12,7 +12,7 @@ const collectionsBasePath = "collections"
 // of the Shopify API.
 // See: https://help.shopify.com/api/reference/products/collection
 type CollectionService interface {
-	List(interface{}) ([]Collection, error)
+	List(interface{}) ([]*Collection, error)
 	Get(collectionID int64, options interface{}) (*Collection, error)
 	ListProducts(collectionID int64, options interface{}) ([]Product, error)
 	ListProductsWithPagination(collectionID int64, options interface{}) ([]Product, *Pagination, error)

@@ -115,7 +115,6 @@ type Client struct {
 	InventoryItem              InventoryItemService
 	ShippingZone               ShippingZoneService
 	ProductListing             ProductListingService
-	AccessScopes               AccessScopesService
 }
 
 // A general response error that follows a similar layout to Shopify's response
@@ -290,7 +289,6 @@ func NewClient(app App, shopName, token string, opts ...Option) *Client {
 	c.InventoryItem = &InventoryItemServiceOp{client: c}
 	c.ShippingZone = &ShippingZoneServiceOp{client: c}
 	c.ProductListing = &ProductListingServiceOp{client: c}
-	c.AccessScopes = &AccessScopesServiceOp{client: c}
 
 	// apply any options
 	for _, opt := range opts {
@@ -325,7 +323,7 @@ func (c *Client) doGetHeaders(req *http.Request, v interface{}) (http.Header, er
 		resp, err = c.Client.Do(req)
 		c.logResponse(resp)
 		if err != nil {
-			return nil, err // http client errors, not api responses
+			return nil, err //http client errors, not api responses
 		}
 
 		respErr := CheckResponseError(resp)

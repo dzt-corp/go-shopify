@@ -27,12 +27,15 @@ type OrderService interface {
 	Cancel(int64, interface{}) (*Order, error)
 	Close(int64) (*Order, error)
 	Open(int64) (*Order, error)
-
+	ListFulfillmentOrders(int64, interface{}) (*FulfillmentOrders, error)
 	// MetafieldsService used for Order resource to communicate with Metafields resource
 	MetafieldsService
 
 	// FulfillmentsService used for Order resource to communicate with Fulfillments resource
 	FulfillmentsService
+}
+type FulfillmentOrders struct {
+	Fulfillment []Fulfillment `json:"fulfillment_orders"`
 }
 
 // OrderServiceOp handles communication with the order related methods of the
@@ -449,6 +452,14 @@ func (s *OrderServiceOp) GetOrderHighRisk(orderID int64) (*OrderHightRisk, error
 	path := fmt.Sprintf("%s/%d/risks.json", ordersBasePath, orderID)
 	resource := new(OrderHightRisk)
 	err := s.client.Get(path, resource, nil)
+	return resource, err
+}
+
+// Get fulfilment orders
+func (s *OrderServiceOp) ListFulfillmentOrders(orderID int64, options interface{}) (*FulfillmentOrders, error) {
+	path := fmt.Sprintf("%s/%d/fulfillment_orders.json", ordersBasePath, orderID)
+	resource := new(FulfillmentOrders)
+	err := s.client.Get(path, resource, options)
 	return resource, err
 }
 

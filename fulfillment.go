@@ -14,6 +14,8 @@ type FulfillmentService interface {
 	Get(int64, interface{}) (*Fulfillment, error)
 	Create(Fulfillment) (*Fulfillment, error)
 	Update(Fulfillment) (*Fulfillment, error)
+	CreateV2(FulfilmentV2) (*Fulfillment, error)
+	UpdateTrackingV2(int64, FulfilmentV2) (*Fulfillment, error)
 	Complete(int64) (*Fulfillment, error)
 	Transition(int64) (*Fulfillment, error)
 	Cancel(int64) (*Fulfillment, error)
@@ -59,6 +61,24 @@ type Fulfillment struct {
 	Receipt         Receipt    `json:"receipt,omitempty"`
 	LineItems       []LineItem `json:"line_items,omitempty"`
 	NotifyCustomer  bool       `json:"notify_customer"`
+}
+type FulfilmentV2 struct {
+	LineItemsByFulfillmentOrder []FulfillmentOrder `json:"line_items_by_fulfillment_order"`
+	NotifyCustomer              bool               `json:"notify_customer"`
+	TrackingInfo                TrackingInfo       `json:"tracking_info"`
+}
+type FulfillmentResourceV2 struct {
+	Fulfillment *FulfilmentV2 `json:"fulfillment"`
+}
+
+type TrackingInfo struct {
+	Number  string `json:"number"`
+	Company string `json:"company"`
+	URL     string `json:"url"`
+}
+type FulfillmentOrder struct {
+	FulfillmentOrderID        int64      `json:"fulfillment_order_id"`
+	FulfillmentOrderLineItems []LineItem `json:"fulfillment_order_line_items"`
 }
 
 // Receipt represents a Shopify receipt.
@@ -146,5 +166,23 @@ func (s *FulfillmentServiceOp) Cancel(fulfillmentID int64) (*Fulfillment, error)
 	path := fmt.Sprintf("%s/%d/cancel.json", prefix, fulfillmentID)
 	resource := new(FulfillmentResource)
 	err := s.client.Post(path, nil, resource)
+	return resource.Fulfillment, err
+}
+
+//v2
+func (s *FulfillmentServiceOp) CreateV2(fulfillment FulfilmentV2) (*Fulfillment, error) {
+	prefix := FulfillmentPathPrefix("", s.resourceID)
+	path := fmt.Sprintf("%s.json", prefix)
+	wrappedData := FulfillmentResourceV2{Fulfillment: &fulfillment}
+	resource := new(FulfillmentResource)
+	err := s.client.Post(path, wrappedData, resource)
+	return resource.Fulfillment, err
+}
+func (s *FulfillmentServiceOp) UpdateTrackingV2(id int64, fulfillment FulfilmentV2) (*Fulfillment, error) {
+	prefix := FulfillmentPathPrefix("", s.resourceID)
+	path := fmt.Sprintf("%d/update_tracking.json", prefix, id)
+	wrappedData := FulfillmentResourceV2{Fulfillment: &fulfillment}
+	resource := new(FulfillmentResource)
+	err := s.client.Put(path, wrappedData, resource)
 	return resource.Fulfillment, err
 }

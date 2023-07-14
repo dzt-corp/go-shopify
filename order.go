@@ -27,9 +27,10 @@ type OrderService interface {
 	Cancel(int64, interface{}) (*Order, error)
 	Close(int64) (*Order, error)
 	Open(int64) (*Order, error)
-	ListFulfillmentOrders(int64, interface{}) (*FulfillmentOrders, error)
 	// MetafieldsService used for Order resource to communicate with Metafields resource
 	MetafieldsService
+	//fulfilment order
+	FulfillmentOrdersService
 
 	// FulfillmentsService used for Order resource to communicate with Fulfillments resource
 	FulfillmentsService
@@ -455,14 +456,6 @@ func (s *OrderServiceOp) GetOrderHighRisk(orderID int64) (*OrderHightRisk, error
 	return resource, err
 }
 
-// Get fulfilment orders
-func (s *OrderServiceOp) ListFulfillmentOrders(orderID int64, options interface{}) (*FulfillmentOrders, error) {
-	path := fmt.Sprintf("%s/%d/fulfillment_orders.json", ordersBasePath, orderID)
-	resource := new(FulfillmentOrders)
-	err := s.client.Get(path, resource, options)
-	return resource, err
-}
-
 // Get individual order
 func (s *OrderServiceOp) GetRefund(orderID int64) (*OrderRefundResource, error) {
 	path := fmt.Sprintf("%s/%v/refunds.json", ordersBasePath, orderID)
@@ -595,4 +588,10 @@ func (s *OrderServiceOp) TransitionFulfillment(orderID int64, fulfillmentID int6
 func (s *OrderServiceOp) CancelFulfillment(orderID int64, fulfillmentID int64) (*Fulfillment, error) {
 	fulfillmentService := &FulfillmentServiceOp{client: s.client, resource: ordersResourceName, resourceID: orderID}
 	return fulfillmentService.Cancel(fulfillmentID)
+}
+
+// get all fulfillment for an order
+func (s *OrderServiceOp) GetListFulfillmentOrder(orderID int64, options interface{}) ([]*FulfillmentOrder, error) {
+	fulfillmentOrderService := &FulfillmentOrderServiceOp{client: s.client, resource: ordersResourceName, resourceID: orderID}
+	return fulfillmentOrderService.List(options)
 }

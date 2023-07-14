@@ -63,9 +63,9 @@ type Fulfillment struct {
 	NotifyCustomer  bool       `json:"notify_customer"`
 }
 type FulfilmentV2 struct {
-	LineItemsByFulfillmentOrder []FulfillmentOrder `json:"line_items_by_fulfillment_order"`
-	NotifyCustomer              bool               `json:"notify_customer"`
-	TrackingInfo                TrackingInfo       `json:"tracking_info"`
+	LineItemsByFulfillmentOrder []FulfillmentOrderReq `json:"line_items_by_fulfillment_order"`
+	NotifyCustomer              bool                  `json:"notify_customer"`
+	TrackingInfo                TrackingInfo          `json:"tracking_info"`
 }
 type FulfillmentResourceV2 struct {
 	Fulfillment *FulfilmentV2 `json:"fulfillment"`
@@ -76,7 +76,7 @@ type TrackingInfo struct {
 	Company string `json:"company"`
 	URL     string `json:"url"`
 }
-type FulfillmentOrder struct {
+type FulfillmentOrderReq struct {
 	FulfillmentOrderID        int64      `json:"fulfillment_order_id"`
 	FulfillmentOrderLineItems []LineItem `json:"fulfillment_order_line_items"`
 }

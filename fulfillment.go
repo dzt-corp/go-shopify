@@ -169,7 +169,7 @@ func (s *FulfillmentServiceOp) Cancel(fulfillmentID int64) (*Fulfillment, error)
 	return resource.Fulfillment, err
 }
 
-//v2
+// v2
 func (s *FulfillmentServiceOp) CreateV2(fulfillment FulfilmentV2) (*Fulfillment, error) {
 	prefix := FulfillmentPathPrefix("", s.resourceID)
 	path := fmt.Sprintf("%s.json", prefix)
@@ -180,9 +180,9 @@ func (s *FulfillmentServiceOp) CreateV2(fulfillment FulfilmentV2) (*Fulfillment,
 }
 func (s *FulfillmentServiceOp) UpdateTrackingV2(id int64, fulfillment FulfilmentV2) (*Fulfillment, error) {
 	prefix := FulfillmentPathPrefix("", s.resourceID)
-	path := fmt.Sprintf("%d/update_tracking.json", prefix, id)
+	path := fmt.Sprintf("%s/%d/update_tracking.json", prefix, id)
 	wrappedData := FulfillmentResourceV2{Fulfillment: &fulfillment}
 	resource := new(FulfillmentResource)
-	err := s.client.Put(path, wrappedData, resource)
+	err := s.client.Post(path, wrappedData, resource)
 	return resource.Fulfillment, err
 }

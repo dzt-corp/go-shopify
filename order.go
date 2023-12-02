@@ -22,7 +22,7 @@ type OrderService interface {
 	Get(int64, interface{}) (*Order, error)
 	GetOrderHighRisk(int64) (*OrderHightRisk, error)
 	GetRefund(int64) (*OrderRefundResources, error)
-	CalculateOrderRefund(int64, Refund) (*Refund, error)
+	CalculateOrderRefund(int64, *Refund) (*Refund, error)
 	Create(Order) (*Order, error)
 	Update(Order) (*Order, error)
 	Cancel(int64, interface{}) (*Order, error)

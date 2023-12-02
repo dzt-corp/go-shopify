@@ -22,7 +22,7 @@ type OrderService interface {
 	Get(int64, interface{}) (*Order, error)
 	GetOrderHighRisk(int64) (*OrderHightRisk, error)
 	GetRefund(int64) (*OrderRefundResources, error)
-	CalculateOrderRefund(int64, Refund) (*OrderRefundResource, error)
+	CalculateOrderRefund(int64, Refund) (*Refund, error)
 	Create(Order) (*Order, error)
 	Update(Order) (*Order, error)
 	Cancel(int64, interface{}) (*Order, error)
@@ -84,7 +84,7 @@ type OrderRefundResources struct {
 	Refunds []Refund `json:"refunds"`
 }
 type OrderRefundResource struct {
-	Refund Refund `json:"refund"`
+	Refund *Refund `json:"refund"`
 }
 
 // A struct for all available order list options.
@@ -473,12 +473,12 @@ func (s *OrderServiceOp) GetRefund(orderID int64) (*OrderRefundResources, error)
 }
 
 // Get individual order
-func (s *OrderServiceOp) CalculateOrderRefund(orderID int64, refund Refund) (*OrderRefundResource, error) {
+func (s *OrderServiceOp) CalculateOrderRefund(orderID int64, refund *Refund) (*Refund, error) {
 	path := fmt.Sprintf("%s/%v/refunds/calculate.json", ordersBasePath, orderID)
 	wrappedData := OrderRefundResource{Refund: refund}
 	resource := new(OrderRefundResource)
 	err := s.client.Post(path, wrappedData, resource)
-	return resource, err
+	return resource.Refund, err
 }
 
 // Create order

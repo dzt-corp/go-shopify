@@ -21,7 +21,8 @@ type OrderService interface {
 	Count(interface{}) (int, error)
 	Get(int64, interface{}) (*Order, error)
 	GetOrderHighRisk(int64) (*OrderHightRisk, error)
-	GetRefund(int64) (*OrderRefundResource, error)
+	GetRefund(int64) (*OrderRefundResources, error)
+	CalculateOrderRefund(int64, Refund) (*OrderRefundResource, error)
 	Create(Order) (*Order, error)
 	Update(Order) (*Order, error)
 	Cancel(int64, interface{}) (*Order, error)
@@ -79,8 +80,11 @@ type OrderHightRiskItem struct {
 	MerchantMessage string  `json:"merchant_message"`
 }
 
-type OrderRefundResource struct {
+type OrderRefundResources struct {
 	Refunds []Refund `json:"refunds"`
+}
+type OrderRefundResource struct {
+	Refund Refund `json:"refund"`
 }
 
 // A struct for all available order list options.
@@ -387,6 +391,7 @@ type ClientDetails struct {
 type Refund struct {
 	Id              int64            `json:"id,omitempty"`
 	OrderId         int64            `json:"order_id,omitempty"`
+	Shipping        RefundShipping   `json:"shipping"`
 	CreatedAt       *time.Time       `json:"created_at,omitempty"`
 	Note            string           `json:"note,omitempty"`
 	Restock         bool             `json:"restock,omitempty"`
@@ -395,6 +400,9 @@ type Refund struct {
 	Transactions    []Transaction    `json:"transactions,omitempty"`
 }
 
+type RefundShipping struct {
+	Amount *decimal.Decimal `json:"amount,omitempty"`
+}
 type RefundLineItem struct {
 	Id         int64            `json:"id,omitempty"`
 	Quantity   int              `json:"quantity,omitempty"`
@@ -457,10 +465,19 @@ func (s *OrderServiceOp) GetOrderHighRisk(orderID int64) (*OrderHightRisk, error
 }
 
 // Get individual order
-func (s *OrderServiceOp) GetRefund(orderID int64) (*OrderRefundResource, error) {
+func (s *OrderServiceOp) GetRefund(orderID int64) (*OrderRefundResources, error) {
 	path := fmt.Sprintf("%s/%v/refunds.json", ordersBasePath, orderID)
-	resource := new(OrderRefundResource)
+	resource := new(OrderRefundResources)
 	err := s.client.Get(path, resource, nil)
+	return resource, err
+}
+
+// Get individual order
+func (s *OrderServiceOp) CalculateOrderRefund(orderID int64, refund Refund) (*OrderRefundResource, error) {
+	path := fmt.Sprintf("%s/%v/refunds/calculate.json", ordersBasePath, orderID)
+	wrappedData := OrderRefundResource{Refund: refund}
+	resource := new(OrderRefundResource)
+	err := s.client.Post(path, wrappedData, resource)
 	return resource, err
 }
 

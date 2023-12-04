@@ -328,6 +328,50 @@ func TestOrderGetRefund(t *testing.T) {
 	}
 }
 
+func TestOrderCreateRefund(t *testing.T) {
+	setup()
+	defer teardown()
+
+	httpmock.RegisterResponder("GET", fmt.Sprintf("https://fooshop.myshopify.com/%s/orders/450789469/refunds.json", client.pathPrefix),
+		httpmock.NewBytesResponder(200, loadFixture("order_refund.json")))
+
+	amount := decimal.NewFromFloat(float64(41.1))
+	parentID := int64(801038806)
+	newRefund := Refund{
+		OrderId: 450789469,
+		RefundLineItems: []RefundLineItem{
+			{
+				Quantity:   1,
+				LineItemId: 518995019,
+			},
+		},
+		Transactions: []Transaction{
+			{
+				ParentID: &parentID,
+				Amount:   &amount,
+				Kind:     "refund",
+				Gateway:  "bogus",
+			},
+		},
+	}
+
+	refund, err := client.Order.CreateRefund(450789469, newRefund)
+	if err != nil {
+		t.Errorf("Order.GetRefund returned error: %v", err)
+	}
+	byte, _ := json.Marshal(refund)
+	var refundMap map[string]interface{}
+	err = json.Unmarshal(byte, &refundMap)
+	found := false
+	actual := refundMap["order_id"].(float64)
+	if actual == 450789469 {
+		found = true
+	}
+	if !found {
+		t.Error("Error.")
+	}
+}
+
 func TestOrderGetWithTransactions(t *testing.T) {
 	setup()
 	defer teardown()

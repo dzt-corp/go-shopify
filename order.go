@@ -22,7 +22,7 @@ type OrderService interface {
 	Get(int64, interface{}) (*Order, error)
 	GetOrderHighRisk(int64) (*OrderHightRisk, error)
 	GetRefund(int64) (*OrderRefundResources, error)
-	CreateRefund(int64, Refund) (*OrderRefundResources, error)
+	CreateRefund(int64, Refund) (*OrderRefundResource, error)
 	CalculateOrderRefund(int64, Refund) (*OrderRefundResource, error)
 	Create(Order) (*Order, error)
 	Update(Order) (*Order, error)
@@ -474,10 +474,10 @@ func (s *OrderServiceOp) GetRefund(orderID int64) (*OrderRefundResources, error)
 }
 
 // Create refund order
-func (s *OrderServiceOp) CreateRefund(orderID int64, refund Refund) (*OrderRefundResources, error) {
+func (s *OrderServiceOp) CreateRefund(orderID int64, refund Refund) (*OrderRefundResource, error) {
 	path := fmt.Sprintf("%s/%v/refunds.json", ordersBasePath, orderID)
 	wrappedData := OrderRefundResource{Refund: refund}
-	resource := new(OrderRefundResources)
+	resource := new(OrderRefundResource)
 	err := s.client.Post(path, wrappedData, resource)
 	return resource, err
 }

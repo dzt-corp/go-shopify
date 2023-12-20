@@ -355,7 +355,7 @@ func TestOrderCreateRefund(t *testing.T) {
 		},
 	}
 
-	refund, err := client.Order.CreateRefund(450789469, newRefund)
+	refund, err := client.Order.CreateRefund(450789469, &newRefund)
 	if err != nil {
 		t.Errorf("Order.GetRefund returned error: %v", err)
 	}

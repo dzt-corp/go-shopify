@@ -234,6 +234,7 @@ type LineItem struct {
 	Properties                 []NoteAttribute       `json:"properties,omitempty"`
 	ProductExists              bool                  `json:"product_exists,omitempty"`
 	FulfillableQuantity        int                   `json:"fulfillable_quantity,omitempty"`
+	CurrentQuantity            int                   `json:"current_quantity,omitempty"`
 	Grams                      int                   `json:"grams,omitempty"`
 	FulfillmentStatus          string                `json:"fulfillment_status,omitempty"`
 	TaxLines                   []TaxLine             `json:"tax_lines,omitempty"`

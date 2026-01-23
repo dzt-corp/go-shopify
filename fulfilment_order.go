@@ -63,12 +63,13 @@ type DeliveryMethod struct {
 	MaxDeliveryDateTime *string `json:"max_delivery_date_time"`
 }
 type FulfillmentLineItem struct {
-	ID                  int64 `json:"id"`
-	ShopID              int64 `json:"shop_id"`
-	FulfillmentOrderID  int64 `json:"fulfillment_order_id"`
-	Quantity            int   `json:"quantity"`
-	LineItemID          int64 `json:"line_item_id"`
-	InventoryItemID     int64 `json:"inventory_item_id"`
-	FulfillableQuantity int   `json:"fulfillable_quantity"`
-	VariantID           int64 `json:"variant_id"`
+	ID                  int64  `json:"id"`
+	ShopID              int64  `json:"shop_id"`
+	FulfillmentOrderID  int64  `json:"fulfillment_order_id"`
+	Quantity            int    `json:"quantity"`
+	LineItemID          int64  `json:"line_item_id"`
+	InventoryItemID     int64  `json:"inventory_item_id"`
+	FulfillableQuantity int    `json:"fulfillable_quantity"`
+	VariantID           int64  `json:"variant_id"`
+	Sku                 string `json:"sku"`
 }

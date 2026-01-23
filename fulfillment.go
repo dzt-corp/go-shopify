@@ -72,10 +72,13 @@ type FulfillmentResourceV2 struct {
 }
 
 type TrackingInfo struct {
-	Number  string `json:"number"`
-	Company string `json:"company,omitempty"`
-	URL     string `json:"url,omitempty"`
+	Number  string   `json:"number"`
+	Numbers []string `json:"numbers,omitempty"`
+	Company string   `json:"company,omitempty"`
+	URL     string   `json:"url,omitempty"`
+	URLS    []string `json:"urls,omitempty"`
 }
+
 type FulfillmentOrderReq struct {
 	FulfillmentOrderID        int64      `json:"fulfillment_order_id"`
 	FulfillmentOrderLineItems []LineItem `json:"fulfillment_order_line_items"`

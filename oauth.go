@@ -2,15 +2,18 @@ package goshopify
 
 import (
 	"bytes"
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 const shopifyChecksumHeader = "X-Shopify-Hmac-Sha256"
@@ -61,6 +64,83 @@ func (app App) GetAccessToken(shopName string, code string) (string, error) {
 	token := new(Token)
 	err = client.Do(req, token)
 	return token.Token, err
+}
+
+// ClientCredentialsToken represents the response from Shopify's
+// Client Credentials Grant flow (post Jan 2026).
+// Unlike the legacy static token, these tokens expire and must be refreshed.
+type ClientCredentialsToken struct {
+	AccessToken string `json:"access_token"`
+	ExpiresIn   int64  `json:"expires_in"`  // seconds until expiry, typically 86400 (24h)
+	TokenType   string `json:"token_type"`  // usually "bearer"
+	Scope       string `json:"scope"`
+}
+
+// GetAccessTokenWithClientCredentialsGrant exchanges the app's ApiKey (client_id)
+// and ApiSecret (client_secret) for a short-lived access token using Shopify's
+// Client Credentials Grant flow.
+//
+// This is the required auth method for custom apps created via Dev Dashboard
+// after Shopify deprecated legacy custom apps (Jan 1, 2026).
+//
+// Usage:
+//
+//	app := goshopify.App{
+//	    ApiKey:    "your_client_id",
+//	    ApiSecret: "your_client_secret",
+//	}
+//	tokenData, err := app.GetAccessTokenWithClientCredentialsGrant(ctx, "your-shop")
+//	client := goshopify.NewClient(app, "your-shop", tokenData.AccessToken)
+func (app App) GetAccessTokenWithClientCredentialsGrant(ctx context.Context, shopName string) (*ClientCredentialsToken, error) {
+	if app.ApiKey == "" || app.ApiSecret == "" {
+		return nil, errors.New("ApiKey (client_id) and ApiSecret (client_secret) are required for Client Credentials Grant")
+	}
+
+	shopURL, err := url.Parse(ShopBaseUrl(shopName))
+	if err != nil {
+		return nil, fmt.Errorf("invalid shop name %q: %w", shopName, err)
+	}
+	shopURL.Path = "/" + accessTokenRelPath
+
+	data := url.Values{
+		"grant_type":    {"client_credentials"},
+		"client_id":     {app.ApiKey},
+		"client_secret": {app.ApiSecret},
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", shopURL.String(), bytes.NewBufferString(data.Encode()))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Accept", "application/json")
+
+	httpClient := &http.Client{Timeout: 30 * time.Second}
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("client credentials request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("client credentials grant failed (HTTP %d): %s", resp.StatusCode, string(body))
+	}
+
+	tokenResp := &ClientCredentialsToken{}
+	if err := json.Unmarshal(body, tokenResp); err != nil {
+		return nil, fmt.Errorf("failed to decode token response: %w", err)
+	}
+
+	if tokenResp.AccessToken == "" {
+		return nil, errors.New("received empty access token from Shopify")
+	}
+
+	return tokenResp, nil
 }
 
 // Verify a message against a message HMAC
